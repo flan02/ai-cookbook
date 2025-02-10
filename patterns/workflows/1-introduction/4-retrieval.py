@@ -1,6 +1,6 @@
 
-# Step 4 - Retrieval
-# Using tools to get data for context
+# - Step 4 - Retrieval
+# - Using tools to get data for context
 
 import json
 import os
@@ -15,7 +15,7 @@ docs: https://platform.openai.com/docs/guides/function-calling
 """
 
 # --------------------------------------------------------------
-# Define the knowledge base retrieval tool
+# Define the knowledge base (kb) retrieval tool
 # --------------------------------------------------------------
 
 
@@ -24,9 +24,9 @@ def search_kb(question: str):
     Load the whole knowledge base from the JSON file.
     (This is a mock function for demonstration purposes, we don't search)
     """
+    # - This is a mock json file with some knowledge base records (3QA)
     with open("kb.json", "r") as f:
         return json.load(f)
-
 
 # --------------------------------------------------------------
 # Step 1: Call model with search_kb tool defined
@@ -68,7 +68,8 @@ completion = client.chat.completions.create(
 # Step 2: Model decides to call function(s)
 # --------------------------------------------------------------
 
-completion.model_dump()
+response = completion.model_dump()
+print(json.dumps(response, indent=2))
 
 # --------------------------------------------------------------
 # Step 3: Execute search_kb function
@@ -86,9 +87,11 @@ for tool_call in completion.choices[0].message.tool_calls:
     messages.append(completion.choices[0].message)
 
     result = call_function(name, args)
-    messages.append(
-        {"role": "tool", "tool_call_id": tool_call.id, "content": json.dumps(result)}
-    )
+    messages.append({
+        "role": "tool", 
+        "tool_call_id": tool_call.id, 
+        "content": json.dumps(result)
+    })
 
 # --------------------------------------------------------------
 # Step 4: Supply result and call model again
@@ -99,12 +102,15 @@ class KBResponse(BaseModel):
     answer: str = Field(description="The answer to the user's question.")
     source: int = Field(description="The record id of the answer.")
 
-
+""" Making the API call
+We now not only send the user question, but also the previous tool
+call and the result that we got back from the function.
+"""
 completion_2 = client.beta.chat.completions.parse(
     model="gpt-4o",
     messages=messages,
     tools=tools,
-    response_format=KBResponse,
+    response_format=KBResponse
 )
 
 # --------------------------------------------------------------
@@ -112,8 +118,8 @@ completion_2 = client.beta.chat.completions.parse(
 # --------------------------------------------------------------
 
 final_response = completion_2.choices[0].message.parsed
-final_response.answer
-final_response.source
+print(final_response.answer)
+final_response.source # return 1 (record id from the knowledge base kb.json)
 
 # --------------------------------------------------------------
 # Question that doesn't trigger the tool
@@ -130,4 +136,5 @@ completion_3 = client.beta.chat.completions.parse(
     tools=tools,
 )
 
-completion_3.choices[0].message.content
+response = completion_3.choices[0].message.content
+print(response)
