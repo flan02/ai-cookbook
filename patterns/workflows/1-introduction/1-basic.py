@@ -1,3 +1,7 @@
+
+# - Step 1 - Direct API call
+# - Learn how to make your first API request
+
 import os
 
 from openai import OpenAI

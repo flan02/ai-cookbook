@@ -5,6 +5,7 @@ This repository contains practical patterns and examples for building effective 
 Whether you're building autonomous agents or structured workflows, you'll find proven patterns that can be implemented with just a few lines of code. Each pattern is illustrated with practical examples and diagrams to help you understand when and how to apply them effectively.
 
 Learn more about the theory and practice behind these patterns:
+
 - [Building Effective Agents](https://www.anthropic.com/research/building-effective-agents) - Anthropic's blog post
 - [Practical LLM Patterns Video Guide](https://youtu.be/tx5OapbK-8A) - Video walkthrough of key concepts by Dave Ebbelaar
 

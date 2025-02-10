@@ -1,3 +1,7 @@
+
+# - Step 3 - Using tools
+# - Enable models to fetch data and take actions
+
 import json
 import os
 
@@ -66,13 +70,19 @@ completion = client.chat.completions.create(
 # Step 2: Model decides to call function(s)
 # --------------------------------------------------------------
 
-completion.model_dump()
+model_response = completion.model_dump()
+print(json.dumps(model_response, indent=2))
 
 # --------------------------------------------------------------
 # Step 3: Execute get_weather function
 # --------------------------------------------------------------
 
-
+""" 
+Calling the function
+    When the model calls a function, you must execute it and return the result.
+    Since model responses can include zero, one, or multiple calls, it is best practice
+    to assume there are several.
+"""
 def call_function(name, args):
     if name == "get_weather":
         return get_weather(**args)
@@ -93,7 +103,7 @@ for tool_call in completion.choices[0].message.tool_calls:
 # --------------------------------------------------------------
 
 
-class WeatherResponse(BaseModel):
+class WeatherResponse(BaseModel): # | Pydantic datamodel
     temperature: float = Field(
         description="The current temperature in celsius for the given location."
     )
@@ -102,11 +112,16 @@ class WeatherResponse(BaseModel):
     )
 
 
+
+""" Making the API call
+We now not only send the user question, but also the previous tool call and the
+result that we got back from the function.
+"""
 completion_2 = client.beta.chat.completions.parse(
     model="gpt-4o",
     messages=messages,
     tools=tools,
-    response_format=WeatherResponse,
+    response_format=WeatherResponse
 )
 
 # --------------------------------------------------------------
@@ -115,4 +130,4 @@ completion_2 = client.beta.chat.completions.parse(
 
 final_response = completion_2.choices[0].message.parsed
 final_response.temperature
-final_response.response
+print(final_response.response)

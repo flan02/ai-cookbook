@@ -1,3 +1,7 @@
+
+# Step 4 - Retrieval
+# Using tools to get data for context
+
 import json
 import os
 

@@ -1,7 +1,11 @@
+
+# - Step 2 - Structured output
+# - Ensure responses adhere to a JSON schema 
+
 import os
 
 from openai import OpenAI
-from pydantic import BaseModel
+from pydantic import BaseModel # Is the most widely used data validation library for Python
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -21,6 +25,7 @@ class CalendarEvent(BaseModel):
 # Step 2: Call the model
 # --------------------------------------------------------------
 
+# Structured output is still in beta
 completion = client.beta.chat.completions.parse(
     model="gpt-4o",
     messages=[
@@ -30,7 +35,7 @@ completion = client.beta.chat.completions.parse(
             "content": "Alice and Bob are going to a science fair on Friday.",
         },
     ],
-    response_format=CalendarEvent,
+    response_format=CalendarEvent
 )
 
 # --------------------------------------------------------------
@@ -41,3 +46,5 @@ event = completion.choices[0].message.parsed
 event.name
 event.date
 event.participants
+
+print(event)
