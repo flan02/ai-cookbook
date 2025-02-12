@@ -5,6 +5,17 @@ from openai import OpenAI
 import os
 import logging
 
+""" Docs
+https://www.anthropic.com/research/building-effective-agents
+"""
+
+# $ Prompt chain flow
+# | Step 1. Define the data models
+# | Step 2. Define the functions to make the API call
+# | Step 3. Create the chain function to run everything
+# | Step 4. Test the chain with a valid input
+# | Step 5. Test the chain with an invalid input
+
 # Set up logging configuration
 logging.basicConfig(
     level=logging.INFO,
@@ -17,9 +28,8 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 model = "gpt-4o"
 
 # --------------------------------------------------------------
-# Step 1: Define the data models for each stage
+# $ Step 1: Define the data models for each stage
 # --------------------------------------------------------------
-
 
 class EventExtraction(BaseModel):
     """First LLM call: Extract basic event information"""
@@ -52,11 +62,9 @@ class EventConfirmation(BaseModel):
         description="Generated calendar link if applicable"
     )
 
-
 # --------------------------------------------------------------
-# Step 2: Define the functions
+# $ Step 2: Define the functions
 # --------------------------------------------------------------
-
 
 def extract_event_info(user_input: str) -> EventExtraction:
     """First LLM call to determine if input is a calendar event"""
@@ -75,9 +83,10 @@ def extract_event_info(user_input: str) -> EventExtraction:
             },
             {"role": "user", "content": user_input},
         ],
-        response_format=EventExtraction,
+        response_format=EventExtraction # TODO: Data model that we already defined
     )
     result = completion.choices[0].message.parsed
+    
     logger.info(
         f"Extraction complete - Is calendar event: {result.is_calendar_event}, Confidence: {result.confidence_score:.2f}"
     )
@@ -131,22 +140,22 @@ def generate_confirmation(event_details: EventDetails) -> EventConfirmation:
 
 
 # --------------------------------------------------------------
-# Step 3: Chain the functions together
+# $ Step 3: Chain the functions together
 # --------------------------------------------------------------
 
-
+# Final fc that brings everything together
 def process_calendar_request(user_input: str) -> Optional[EventConfirmation]:
     """Main function implementing the prompt chain with gate check"""
     logger.info("Processing calendar request")
     logger.debug(f"Raw input: {user_input}")
 
-    # First LLM call: Extract basic info
+    # | First LLM call: Extract basic info
     initial_extraction = extract_event_info(user_input)
 
     # Gate check: Verify if it's a calendar event with sufficient confidence
     if (
         not initial_extraction.is_calendar_event
-        or initial_extraction.confidence_score < 0.7
+        or initial_extraction.confidence_score < 0.7 
     ):
         logger.warning(
             f"Gate check failed - is_calendar_event: {initial_extraction.is_calendar_event}, confidence: {initial_extraction.confidence_score:.2f}"
@@ -155,23 +164,23 @@ def process_calendar_request(user_input: str) -> Optional[EventConfirmation]:
 
     logger.info("Gate check passed, proceeding with event processing")
 
-    # Second LLM call: Get detailed event information
+    # | Second LLM call: Get detailed event information
     event_details = parse_event_details(initial_extraction.description)
 
-    # Third LLM call: Generate confirmation
+    # | Third LLM call: Generate confirmation
     confirmation = generate_confirmation(event_details)
-
+    
     logger.info("Calendar request processing completed successfully")
     return confirmation
 
 
 # --------------------------------------------------------------
-# Step 4: Test the chain with a valid input
+# $ Step 4: Test the chain with a valid input
 # --------------------------------------------------------------
 
 user_input = "Let's schedule a 1h team meeting next Tuesday at 2pm with Alice and Bob to discuss the project roadmap."
 
-result = process_calendar_request(user_input)
+result = process_calendar_request(user_input) # TODO: Run the chain
 if result:
     print(f"Confirmation: {result.confirmation_message}")
     if result.calendar_link:
@@ -181,15 +190,15 @@ else:
 
 
 # --------------------------------------------------------------
-# Step 5: Test the chain with an invalid input
+# $ Step 5: Test the chain with an invalid input
 # --------------------------------------------------------------
 
-user_input = "Can you send an email to Alice and Bob to discuss the project roadmap?"
+# user_input = "Can you send an email to Alice and Bob to discuss the project roadmap?"
 
-result = process_calendar_request(user_input)
-if result:
-    print(f"Confirmation: {result.confirmation_message}")
-    if result.calendar_link:
-        print(f"Calendar Link: {result.calendar_link}")
-else:
-    print("This doesn't appear to be a calendar event request.")
+# result = process_calendar_request(user_input)
+# if result:
+#     print(f"Confirmation: {result.confirmation_message}")
+#     if result.calendar_link:
+#         print(f"Calendar Link: {result.calendar_link}")
+# else:
+#     print("This doesn't appear to be a calendar event request.")

@@ -1,10 +1,16 @@
 import asyncio
 import logging
 import os
-
 import nest_asyncio
 from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
+
+# $ LLM Guardrails
+""" 
+An LLM guardrail is a set of predefined rules, constraints, or filtering mechanisms 
+designed to ensure that a large language model (LLM) generates safe, accurate, and
+compliant outputs while preventing harmful or unintended responses.
+"""
 
 nest_asyncio.apply()
 
@@ -20,9 +26,8 @@ client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 model = "gpt-4o"
 
 # --------------------------------------------------------------
-# Step 1: Define validation models
+# $ Step 1: Define validation models
 # --------------------------------------------------------------
-
 
 class CalendarValidation(BaseModel):
     """Check if input is a valid calendar request"""
@@ -39,9 +44,8 @@ class SecurityCheck(BaseModel):
 
 
 # --------------------------------------------------------------
-# Step 2: Define parallel validation tasks
+# $ Step 2: Define parallel validation tasks
 # --------------------------------------------------------------
-
 
 async def validate_calendar_request(user_input: str) -> CalendarValidation:
     """Check if the input is a valid calendar request"""
@@ -76,9 +80,8 @@ async def check_security(user_input: str) -> SecurityCheck:
 
 
 # --------------------------------------------------------------
-# Step 3: Main validation function
+# $ Step 3: Main validation function
 # --------------------------------------------------------------
-
 
 async def validate_request(user_input: str) -> bool:
     """Run validation checks in parallel"""
@@ -103,9 +106,8 @@ async def validate_request(user_input: str) -> bool:
 
 
 # --------------------------------------------------------------
-# Step 4: Run valid example
+# $ Step 4: Run valid example
 # --------------------------------------------------------------
-
 
 async def run_valid_example():
     # Test valid request
@@ -117,9 +119,8 @@ async def run_valid_example():
 asyncio.run(run_valid_example())
 
 # --------------------------------------------------------------
-# Step 5: Run suspicious example
+# $ Step 5: Run suspicious example
 # --------------------------------------------------------------
-
 
 async def run_suspicious_example():
     # Test potential injection

@@ -17,7 +17,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 model = "gpt-4o-mini"
 
 # --------------------------------------------------------------
-# Step 1: Define the data models
+# $ Step 1: Define the data models
 # --------------------------------------------------------------
 
 
@@ -63,7 +63,7 @@ class ReviewFeedback(BaseModel):
 
 
 # --------------------------------------------------------------
-# Step 2: Define prompts
+# $ Step 2: Define prompts
 # --------------------------------------------------------------
 
 ORCHESTRATOR_PROMPT = """
@@ -126,7 +126,7 @@ The final version should incorporate your suggested improvements into a polished
 """
 
 # --------------------------------------------------------------
-# Step 3: Implement orchestrator
+# $ Step 3: Implement orchestrator
 # --------------------------------------------------------------
 
 
@@ -239,7 +239,7 @@ class BlogOrchestrator:
 
 
 # --------------------------------------------------------------
-# Step 4: Example usage
+# $ Step 4: Example usage
 # --------------------------------------------------------------
 
 if __name__ == "__main__":
